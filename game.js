@@ -42,9 +42,9 @@ const gitPosition = {
 };
 let enemiePositions = [];
 
-/* function fixNumber(n) {
-    return Number(n.toFixed(2));
-} */
+function fixNumber(n) {
+    return Number(n.toFixed(0));
+}
 
 function setCanvasSize() {
     if (window.innerHeight > window.innerWidth) {
@@ -53,11 +53,13 @@ function setCanvasSize() {
         canvasSize = window.innerHeight * 0.6;
     }
 
-    canvasSize = Number(canvasSize.toFixed(0));
+    canvasSize = fixNumber(canvasSize);
+
     canvas.setAttribute("width", canvasSize);
     canvas.setAttribute("height", canvasSize);
 
     elementsSize = canvasSize / 10;
+    elementsSize = fixNumber(elementsSize);
     playerPosition.x = undefined;
     playerPosition.y = undefined;
     startGame();
@@ -119,10 +121,8 @@ function startGame() {
 }
 
 function movePlayer() {
-    const giftColisionX =
-        playerPosition.x.toFixed(2) == gitPosition.x.toFixed(2);
-    const giftColisionY =
-        playerPosition.y.toFixed(2) == gitPosition.y.toFixed(2);
+    const giftColisionX = playerPosition.x == gitPosition.x;
+    const giftColisionY = playerPosition.y == gitPosition.y;
 
     const giftColision = giftColisionX && giftColisionY;
 
@@ -131,10 +131,8 @@ function movePlayer() {
         nuevoNivel();
     }
     const enemiColition = enemiePositions.find((enemy) => {
-        const enemyColitionX =
-            enemy.x.toFixed(2) == playerPosition.x.toFixed(2);
-        const enemyColitionY =
-            enemy.y.toFixed(2) == playerPosition.y.toFixed(2);
+        const enemyColitionX = enemy.x == playerPosition.x;
+        const enemyColitionY = enemy.y == playerPosition.y;
 
         return enemyColitionX && enemyColitionY;
     });
