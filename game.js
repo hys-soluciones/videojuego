@@ -17,6 +17,13 @@ const spanLives = document.querySelector("#lives");
 const spanTime = document.querySelector("#time");
 const spanRecord = document.querySelector("#record");
 const pResult = document.querySelector("#result");
+const btnReset = document.querySelector("#reset-btn");
+
+btnReset.addEventListener("click", resetGame);
+
+function resetGame() {
+    location.reload();
+}
 /* Creamos un contexto para axceder a los metodos y comensar a dibujar el canvas*/
 const game = canvas.getContext("2d");
 /* Para cuando termine de cargar nuestro documento html ejecute la funcion, se hace con load*/

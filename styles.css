@@ -60,6 +60,10 @@ p {
     margin: 0;
     width: 100%;
 }
+#reset-btn {
+    margin-top: 20px;
+    width: 180px;
+}
 
 @media (max-width: 440px) {
     button {
