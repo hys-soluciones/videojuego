@@ -28,7 +28,7 @@ function resetGame() {
 const game = canvas.getContext("2d");
 /* Para cuando termine de cargar nuestro documento html ejecute la funcion, se hace con load*/
 window.addEventListener("load", setCanvasSize);
-window.addEventListener("resize", setCanvasSize); //Para que la pagina se actualice cada  vez que se modifica el tamaño de la pantalla
+window.addEventListener("resize", setCanvasSize); //Para que la pagina se actualice cada  vez que se modifica el tamaño de la pantalla "resize", llamamos denuevo setCanvasSize
 
 let canvasSize;
 let elementsSize;
@@ -47,12 +47,14 @@ const gitPosition = {
     x: undefined,
     y: undefined,
 };
+
 let enemiePositions = [];
 
 function fixNumber(n) {
     return Number(n.toFixed(0));
 }
 
+/*setCanvasSize() funcion para calcular el width y el height del canvas en canvasSize y luego dividirlo en 10*10 en el elementSize que serian los elementos que ocuparian el canvas */
 function setCanvasSize() {
     if (window.innerHeight > window.innerWidth) {
         canvasSize = window.innerWidth * 0.6;
@@ -67,23 +69,31 @@ function setCanvasSize() {
 
     elementsSize = canvasSize / 10;
     elementsSize = fixNumber(elementsSize);
+
     playerPosition.x = undefined;
     playerPosition.y = undefined;
+    //si nesecito renderizar de nuevo
+
     startGame();
 }
-
+/*  con startGame  rederiza los elementos de nuestro mapa*/
 function startGame() {
+    /* con game.font: le asignamos el tamaño del elemento con el tipo de fuente a utilizar */
     game.font = elementsSize + "px Verdana";
+    /*  game.textAlign = end, ubicamos el elemento al final del canvas  quedando en la primera posicion*/
     game.textAlign = "end";
 
+    /*  map representa el mapa que se recorrera dependiendo del nivel o posicion que tenga en maps[] */
     const map = maps[nivel];
 
     if (!map) {
+        /* Cuando terminamos el juego guardamos los tiempos y comparamos */
         gameWin();
         return;
     }
 
     if (!timeStart) {
+        /*  sino existe lo creamos */
         timeStart = Date.now();
         timeIntervale = setInterval(showTime, 100);
         showRecord();
@@ -92,16 +102,20 @@ function startGame() {
     /* Con trim() le quitamos los espacios al comienzo y al final de un string  y con split(\n) generamos un array con string*/
     const mapRows = map.trim().split("\n");
     /* Creamos un nuevo arreglo con map(function ) por cada estring de mapRow en mapCol, limpiamos los espacios y los separamos por cada elemento con split("")  en donde cada fila es un arreglo*/
-    const mapCol = mapRows.map((row) => row.trim().split(""));
+    const mapRowCol = mapRows.map((row) => row.trim().split(""));
 
+    /*    Funsion  para agregar los corazone */
     showLives();
 
     enemiePositions = [];
     game.clearRect(0, 0, canvasSize, canvasSize);
-    /* cambiamos el ciclo for anidado por un for each */
-    mapCol.forEach((row, rowI) => {
+    /* Recorremos el mapRowCol con  un forEach */
+    mapRowCol.forEach((row, rowI) => {
+        //Por cada fila recorremos y sacamos las columnas
         row.forEach((col, colI) => {
+            // En emoji guardamos cada uno de los elementos del arreglo
             const emoji = emojis[col];
+            //En posX y posY esta la posicion o coordenadas de cada uno de los elelmentos
             const posX = elementsSize * (colI + 1);
             const posY = elementsSize * (rowI + 1);
 
@@ -123,10 +137,19 @@ function startGame() {
             game.fillText(emoji, posX, posY);
         });
     });
-
+    //Cuando se renderiza el map se ubica denuevo el jugador ,dando el efecto de movimiento
     movePlayer();
 }
+/* ************************** */
+//para remplazar la bombita por la explosion, utilizamos las posiciones de las bombitas y las remplazamos en el momento de la colicion en la function levelFail()
+function remplazo() {
+    enemiePositions.forEach((pos) => {
+        game.fillText(emojis["BOMB_COLLISION2"], pos.x, pos.y);
+    });
+}
 
+/* ************************** */
+//Cada vez que ejecutamos movePleyer, estamos cambiando la posicion del jugador
 function movePlayer() {
     const giftColisionX = playerPosition.x == gitPosition.x;
     const giftColisionY = playerPosition.y == gitPosition.y;
@@ -146,6 +169,7 @@ function movePlayer() {
 
     if (enemiColition) {
         // console.log("Chocaste contra un enemigo");
+
         levelFail();
     }
 
@@ -159,6 +183,7 @@ function nuevoNivel() {
 }
 function levelFail() {
     console.log("Colisionaste con un enemigo");
+
     lives--;
 
     if (lives <= 0) {
@@ -170,8 +195,27 @@ function levelFail() {
     playerPosition.y = undefined;
 
     startGame();
-}
 
+    // Definir una variable para almacenar el identificador del timeout
+    let timeoutId;
+
+    // Función que se ejecutará después de un cierto tiempo es :remplazo()
+
+    // Iniciar el timeout
+    timeoutId = setTimeout(remplazo, 5); // Ejecutar después de 5 segundos
+
+    // Detener el timeout después de 100 mili segundos
+    setTimeout(function () {
+        clearTimeout(timeoutId);
+        console.log("Se ha detenido el setTimeout.");
+        startGame();
+    }, 100);
+
+    // clearTimeout(idTemporizador); // Cancela la ejecución de la función programada
+} /* ******************************** */
+
+/* ********************************** */
+/* Cuando terminamos el juego guardamos los tiempos y comparamos */
 function gameWin() {
     console.log("Terminaste el juego");
     clearInterval(timeIntervale);
@@ -217,27 +261,21 @@ btnDown.addEventListener("click", moveDown);
 
 function moveUp() {
     // console.log("Arriba");
-
+    //Este elemento se mueve en el eje  y , estando abajo para arriba
     // prettier-ignore
-
-    // prettier-ignore
-    if (playerPosition.y - elementsSize < elementsSize) {
+    if ((playerPosition.y - elementsSize) < elementsSize) {
         console.log("OUT");
     }
     else {
+        //Si le restamos a pleyerPosition.y, el tamaño del elemento, lo desplazamos una posicion.
         playerPosition.y -= elementsSize;
+        //se llama de nuevo starGame(), para renderizar de nuevo el mapa en su nueva posicion
         startGame();
     }
-    /*   if (
-        playerPosition.x == gitPosition.x &&
-        playerPosition.y == gitPosition.y
-    ) {
-        console.log("PUN se encontraron");
-    } */
 }
 function moveLeft() {
     // console.log("Izquierda");
-    // console.log(elementsSize);
+    //Este elemento se mueve en el eje  X , estando en la derecha para la izquierda
     // prettier-ignore
     if ((playerPosition.x - elementsSize) < elementsSize) {
         console.log("OUT");
@@ -246,16 +284,10 @@ function moveLeft() {
         startGame();
        
     }
-    /*    if (
-        playerPosition.x == gitPosition.x &&
-        playerPosition.y == gitPosition.y
-    ) {
-        console.log("PUN se encontraron");
-    } */
 }
 function moveRight() {
     // console.log("Derecha");
-    // console.log(canvasSize);
+    //Este elemento se mueve en el eje  X , estando en la izquierda para la derecha
     // prettier-ignore
     if ((playerPosition.x + elementsSize) > canvasSize) {
         console.log("OUT");
@@ -264,16 +296,10 @@ function moveRight() {
         startGame();
     
     }
-    /*     if (
-        playerPosition.x == gitPosition.x &&
-        playerPosition.y == gitPosition.y
-    ) {
-        console.log("PUN se encontraron");
-    } */
 }
 function moveDown() {
     // console.log("Abajo");
-
+    //Este elemento se mueve en el eje  y , estando arriba para abajo
     // prettier-ignore
     if ((playerPosition.y + elementsSize) > canvasSize) {
         console.log("OUT");
@@ -281,15 +307,9 @@ function moveDown() {
         playerPosition.y += elementsSize;
         startGame();
     }
-    /*    if (
-        playerPosition.x == gitPosition.x &&
-        playerPosition.y == gitPosition.y
-    ) {
-        console.log("PUN se encontraron");
-    } */
 }
 
-// Asociar evento keydown al documento
+// Asociar evento keydown al documento , movimiento con las flechitas, keydown es cuando presionamos la tecla.
 window.addEventListener("keydown", moveByKeys);
 
 function moveByKeys(event) {
