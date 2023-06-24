@@ -39,15 +39,18 @@ let timeStart;
 let timePlayer;
 let timeIntervale;
 
+//Ubicacion inicial del jugador playerPosition
 const playerPosition = {
     x: undefined,
     y: undefined,
 };
+//ubicacion inicial del regalito, gitPosition
 const gitPosition = {
     x: undefined,
     y: undefined,
 };
 
+//Ubicacion de las bombas, en sus coordenadas X,Y.
 let enemiePositions = [];
 
 function fixNumber(n) {
@@ -86,16 +89,19 @@ function startGame() {
     /*  map representa el mapa que se recorrera dependiendo del nivel o posicion que tenga en maps[] */
     const map = maps[nivel];
 
+    //Cuando se acaban los mapas llamamos la funcion gameWin
     if (!map) {
         /* Cuando terminamos el juego guardamos los tiempos y comparamos */
         gameWin();
         return;
     }
-
+    //cuando llamamos o inicializamos preguntamos si timeStart tiene algun valor y si no lo tiene lo inicializamos
     if (!timeStart) {
         /*  sino existe lo creamos */
         timeStart = Date.now();
+        //llamamos la funcion showTime cada 100ms, con setInterval y la guardamos en la variable timeInterval
         timeIntervale = setInterval(showTime, 100);
+
         showRecord();
     }
 
@@ -107,7 +113,9 @@ function startGame() {
     /*    Funsion  para agregar los corazone */
     showLives();
 
+    //Llamamos denuevo a enmiePosition = [], basia cada vez que renderizamos para no llenarnos  o duplicar o triplicar la informacion en esa array,
     enemiePositions = [];
+
     game.clearRect(0, 0, canvasSize, canvasSize);
     /* Recorremos el mapRowCol con  un forEach */
     mapRowCol.forEach((row, rowI) => {
@@ -151,15 +159,18 @@ function remplazo() {
 /* ************************** */
 //Cada vez que ejecutamos movePleyer, estamos cambiando la posicion del jugador
 function movePlayer() {
+    //Creamos variable para saber las posibles colisiones en X y en Y, comparamos la posicion del regalito(gitPosition), con la posicion del jugador(peyerPosition)
     const giftColisionX = playerPosition.x == gitPosition.x;
     const giftColisionY = playerPosition.y == gitPosition.y;
-
+    //Si hay colision en ambas, true y true, entonces gitColision es positivo
     const giftColision = giftColisionX && giftColisionY;
 
     if (giftColision) {
         // console.log("Subiste de nivel");
         nuevoNivel();
     }
+
+    //Creamos esta variable (enemiColition) para guardar true o false, si encuentra o choca contra una bomba, (enemiePositions)es la array donde estan guardadas las coordenadas de las bombas, compara la posicion del jugador(playerPosition.x)en X, en Y, con las posiciones de las bombas
     const enemiColition = enemiePositions.find((enemy) => {
         const enemyColitionX = enemy.x == playerPosition.x;
         const enemyColitionY = enemy.y == playerPosition.y;
@@ -189,13 +200,15 @@ function levelFail() {
     if (lives <= 0) {
         nivel = 0;
         lives = 3;
+        //Al perder las 3 vidas reiniciamos el tiempo
         timeStart = undefined;
     }
+    //la ubicacion del jugador en pleyerPosition la igualamos a undefined para que cuando choque con una bomba buenva a la posicion inicial, despues de reiniciar el juego llamando a startGame().
     playerPosition.x = undefined;
     playerPosition.y = undefined;
 
     startGame();
-
+    /* Colision con la bomba y explosion de todas */
     // Definir una variable para almacenar el identificador del timeout
     let timeoutId;
 
@@ -218,37 +231,82 @@ function levelFail() {
 /* Cuando terminamos el juego guardamos los tiempos y comparamos */
 function gameWin() {
     console.log("Terminaste el juego");
+
+    // Con clearInterval(timeIntervale) estamos deteniendo el tiempo al terminar el juego
     clearInterval(timeIntervale);
 
+    //Leemos en  localStorege que tiempo hay guardado y lo guardamos en recortTime
     const recordTime = localStorage.getItem("record-time");
+    //en payerTime guardamos el tiempo que gasto el jugador de completar el juego
     const playerTime = Date.now() - timeStart;
 
     if (recordTime) {
         if (recordTime >= playerTime) {
+            //Si el tiempo fue superado al anterior , guardamos el nuevo record en localStore
             localStorage.setItem("record-time", playerTime);
             pResult.innerHTML = "SUPERASTE EL RECORD ANTERIOR :)";
+
+            /* Colision con la bomba y explosion de todas */
+            // Definir una variable para almacenar el identificador del timeout
+            let timeoutId;
+
+            // Función que se ejecutará después de un cierto tiempo es :final()
+            function final() {
+                enemiePositions.forEach((pos) => {
+                    game.fillText(emojis["PARTY_1"], pos.x, pos.y);
+                });
+            }
+            // Iniciar el timeout
+            timeoutId = setTimeout(final, 5); // Ejecutar después de 5 segundos
+
+            // Detener el timeout después de 100 mili segundos
+            setTimeout(function () {
+                clearTimeout(timeoutId);
+                console.log("Se ha detenido el setTimeout.");
+                //startGame();
+            }, 100);
         } else {
             pResult.innerHTML = "Lo siento no superaste el record :(";
+            /* Colision con la bomba y explosion de todas */
+            // Definir una variable para almacenar el identificador del timeout
+            let timeoutId;
+
+            // Función que se ejecutará después de un cierto tiempo es :final()
+            function final() {
+                enemiePositions.forEach((pos) => {
+                    game.fillText(emojis["GAME_OVER"], pos.x, pos.y);
+                });
+            }
+            // Iniciar el timeout
+            timeoutId = setTimeout(final, 5); // Ejecutar después de 5 segundos
+
+            // Detener el timeout después de 100 mili segundos
+            setTimeout(function () {
+                clearTimeout(timeoutId);
+                console.log("Se ha detenido el setTimeout.");
+                //startGame();
+            }, 100);
         }
     } else {
         localStorage.setItem("record-time", playerTime);
         pResult.innerHTML = "Primera vez que juegas? Exelente";
     }
-    // console.log({ recordTime, playerTime });
 }
 /*    Funsion  para agregar los corazone */
 function showLives() {
+    //Con Array()Creamos un array con la cantidad de elementos que tenga lives, y con .fill le desimos que incerte en cada uno de los espacios un corrazon
     const heartsArray = Array(lives).fill(emojis["HEART"]);
-    // console.log(heartsArray);
+    // con spanLives.innerHTML = "" , cada vez que recarguemos limpiamos los 3 corazoncitos y si pierdo me los descuenta
     spanLives.innerHTML = "";
     for (let i = 0; i < heartsArray.length; i++) {
         spanLives.innerHTML += heartsArray[i];
     }
 }
-/* para controlar el tiempo */
+/* para controlar el tiempo  y mostrar el tiempo que se lleva jugando*/
 function showTime() {
     spanTime.innerHTML = Date.now() - timeStart;
 }
+//Mostramos el record que se encuentra guardado en localStore
 function showRecord() {
     spanRecord.innerHTML = localStorage.getItem("record-time");
 }
@@ -262,6 +320,7 @@ btnDown.addEventListener("click", moveDown);
 function moveUp() {
     // console.log("Arriba");
     //Este elemento se mueve en el eje  y , estando abajo para arriba
+    //Con  el if hacemos la validacion si al pleyerPositio menos el elemento nos daria un numero negativo o mayor al ancho y alto de nuestro canvas, si lo es se estaria saliendo y no hariamos la nueva asignacion, la comparacion se hace contra el elementsSize por que es el punto de inicio del juego.
     // prettier-ignore
     if ((playerPosition.y - elementsSize) < elementsSize) {
         console.log("OUT");
@@ -276,6 +335,7 @@ function moveUp() {
 function moveLeft() {
     // console.log("Izquierda");
     //Este elemento se mueve en el eje  X , estando en la derecha para la izquierda
+    //Con  el if hacemos la validacion si al pleyerPositio menos el elemento nos daria un numero negativo o mayor al ancho y alto de nuestro canvas, si lo es se estaria saliendo y no hariamos la nueva asignacion, la comparacion se hace contra el elementsSize por que es el punto de inicio del juego.
     // prettier-ignore
     if ((playerPosition.x - elementsSize) < elementsSize) {
         console.log("OUT");
@@ -288,6 +348,7 @@ function moveLeft() {
 function moveRight() {
     // console.log("Derecha");
     //Este elemento se mueve en el eje  X , estando en la izquierda para la derecha
+    //Con  el if hacemos la validacion si al pleyerPositio menos el elemento nos daria un numero negativo o mayor al ancho y alto de nuestro canvas, si lo es se estaria saliendo y no hariamos la nueva asignacion, cuando se esta sumando en X o en Y ,nuestra barrera es el canvasSize.
     // prettier-ignore
     if ((playerPosition.x + elementsSize) > canvasSize) {
         console.log("OUT");
@@ -300,6 +361,7 @@ function moveRight() {
 function moveDown() {
     // console.log("Abajo");
     //Este elemento se mueve en el eje  y , estando arriba para abajo
+    //Con  el if hacemos la validacion si al pleyerPositio menos el elemento nos daria un numero negativo o mayor al ancho y alto de nuestro canvas, si lo es se estaria saliendo y no hariamos la nueva asignacion, cuando se esta sumando en X o en Y ,nuestra barrera es el canvasSize.
     // prettier-ignore
     if ((playerPosition.y + elementsSize) > canvasSize) {
         console.log("OUT");
