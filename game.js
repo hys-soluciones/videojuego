@@ -402,5 +402,11 @@ function moveByKeys(event) {
             // Aquí puedes realizar la acción que desees
             moveDown();
             break;
+        case " ":
+            // Acción cuando se presiona la tecla de flecha hacia abajo
+            // console.log("Abajo");
+            // Aquí puedes realizar la acción que desees
+            resetGame();
+            break;
     }
 }
