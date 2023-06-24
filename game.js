@@ -64,7 +64,7 @@ function setCanvasSize() {
     } else {
         canvasSize = window.innerHeight * 0.6;
     }
-
+    //con canvasSize = fixNumber(canvasSize);estoy reduciendo los decimales de las medidas para evitar posibles problemas en el futuro, de no coincidencia por  decimales.
     canvasSize = fixNumber(canvasSize);
 
     canvas.setAttribute("width", canvasSize);
@@ -73,6 +73,7 @@ function setCanvasSize() {
     elementsSize = canvasSize / 10;
     elementsSize = fixNumber(elementsSize);
 
+    /* playerPosition.x = undefined;  playerPosition.y =undefined; No se definen para que cada vez que renderizamos el juego la calaverita o el jugador se mantenga en su posicion y no desenfoque o se mantenga acomodandose con respecto al resto de elementos*/
     playerPosition.x = undefined;
     playerPosition.y = undefined;
     //si nesecito renderizar de nuevo
